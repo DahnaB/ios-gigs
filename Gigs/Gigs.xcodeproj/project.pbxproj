@@ -14,6 +14,8 @@
 		99297F1B243D0627007F9599 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 99297F19243D0627007F9599 /* LaunchScreen.storyboard */; };
 		99297F29243D07E4007F9599 /* GigsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F28243D07E4007F9599 /* GigsTableViewController.swift */; };
 		99297F2B243D0B6D007F9599 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F2A243D0B6D007F9599 /* LoginViewController.swift */; };
+		99297F2D243D1189007F9599 /* Bearer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F2C243D1189007F9599 /* Bearer.swift */; };
+		99297F2F243D11BA007F9599 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F2E243D11BA007F9599 /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		99297F1C243D0627007F9599 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		99297F28243D07E4007F9599 /* GigsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GigsTableViewController.swift; sourceTree = "<group>"; };
 		99297F2A243D0B6D007F9599 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		99297F2C243D1189007F9599 /* Bearer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bearer.swift; sourceTree = "<group>"; };
+		99297F2E243D11BA007F9599 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +86,8 @@
 		99297F23243D066A007F9599 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				99297F2C243D1189007F9599 /* Bearer.swift */,
+				99297F2E243D11BA007F9599 /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -189,7 +195,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99297F2D243D1189007F9599 /* Bearer.swift in Sources */,
 				99297F2B243D0B6D007F9599 /* LoginViewController.swift in Sources */,
+				99297F2F243D11BA007F9599 /* User.swift in Sources */,
 				99297F0F243D0625007F9599 /* AppDelegate.swift in Sources */,
 				99297F11243D0625007F9599 /* SceneDelegate.swift in Sources */,
 				99297F29243D07E4007F9599 /* GigsTableViewController.swift in Sources */,
