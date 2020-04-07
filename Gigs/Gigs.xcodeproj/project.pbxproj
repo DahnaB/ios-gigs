@@ -17,6 +17,8 @@
 		99297F2D243D1189007F9599 /* Bearer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F2C243D1189007F9599 /* Bearer.swift */; };
 		99297F2F243D11BA007F9599 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F2E243D11BA007F9599 /* User.swift */; };
 		99297F31243D1265007F9599 /* GigController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F30243D1265007F9599 /* GigController.swift */; };
+		99297F33243D2D3C007F9599 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F32243D2D3C007F9599 /* LoginViewModel.swift */; };
+		99297F35243D369B007F9599 /* GigsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99297F34243D369B007F9599 /* GigsViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		99297F2C243D1189007F9599 /* Bearer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bearer.swift; sourceTree = "<group>"; };
 		99297F2E243D11BA007F9599 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		99297F30243D1265007F9599 /* GigController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GigController.swift; sourceTree = "<group>"; };
+		99297F32243D2D3C007F9599 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		99297F34243D369B007F9599 /* GigsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GigsViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +101,8 @@
 		99297F24243D067F007F9599 /* View Models */ = {
 			isa = PBXGroup;
 			children = (
+				99297F32243D2D3C007F9599 /* LoginViewModel.swift */,
+				99297F34243D369B007F9599 /* GigsViewModel.swift */,
 			);
 			path = "View Models";
 			sourceTree = "<group>";
@@ -200,8 +206,10 @@
 			files = (
 				99297F2D243D1189007F9599 /* Bearer.swift in Sources */,
 				99297F31243D1265007F9599 /* GigController.swift in Sources */,
+				99297F35243D369B007F9599 /* GigsViewModel.swift in Sources */,
 				99297F2B243D0B6D007F9599 /* LoginViewController.swift in Sources */,
 				99297F2F243D11BA007F9599 /* User.swift in Sources */,
+				99297F33243D2D3C007F9599 /* LoginViewModel.swift in Sources */,
 				99297F0F243D0625007F9599 /* AppDelegate.swift in Sources */,
 				99297F11243D0625007F9599 /* SceneDelegate.swift in Sources */,
 				99297F29243D07E4007F9599 /* GigsTableViewController.swift in Sources */,
@@ -349,6 +357,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Gigs/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -366,6 +375,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9XHQ9HRG34;
 				INFOPLIST_FILE = Gigs/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

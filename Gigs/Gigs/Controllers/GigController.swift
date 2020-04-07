@@ -104,8 +104,6 @@ final class GigController {
         }
     }
     
-    
-    
     private func postRequest(for url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.post.rawValue
