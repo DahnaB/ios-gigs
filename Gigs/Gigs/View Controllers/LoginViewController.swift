@@ -50,7 +50,7 @@ class LoginViewController: UIViewController {
         password.isEmpty == false
             else { return }
         
-        //let user = User(username: username, password: password)
+        let user = User(username: username, password: password)
     }
     
 }
