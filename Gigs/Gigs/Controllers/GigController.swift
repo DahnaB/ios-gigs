@@ -16,13 +16,29 @@ final class GigController {
     
     enum NetworkError: Error {
         case failedSignUp, failedSignIn, noData, badData
+        case notSignedIn, failedFetch, badURL
+    }
+    
+    private enum LoginStatus {
+        case notLoggedIn
+        case loggedIn(Bearer)
+        
+        static var isLoggedIn: Self {
+            if let bearer = GigController.bearer {
+                return loggedIn(bearer)
+            } else {
+                return notLoggedIn
+            }
+        }
     }
     
     static var bearer: Bearer?
+    var gigs: [Gig] = []
     
     private let baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
     private lazy var signUpURL = baseURL.appendingPathComponent("/users/signup")
     private lazy var logInURL = baseURL.appendingPathComponent("/users/login")
+    private lazy var gigsURL = baseURL.appendingPathComponent("/gigs/")
     
     private lazy var jsonEncoder: JSONEncoder = {
         let encoder = JSONEncoder()
@@ -104,10 +120,55 @@ final class GigController {
         }
     }
     
+    func getGigs(completion: @escaping (Result<Gig, NetworkError>) -> Void) {
+        guard case let .loggedIn(bearer) = LoginStatus.isLoggedIn else {
+            return completion(.failure(.notSignedIn))
+        }
+        
+        let request = getRequest(for: gigsURL, bearer: bearer)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Failed to fetch gig with error \(error.localizedDescription)")
+                completion(.failure(.failedFetch))
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse,
+            response.statusCode == 200
+                else {
+                    print(#file, #function, #line, "Fetch gig received bad response")
+                    completion(.failure(.failedFetch))
+                    return
+            }
+            guard let data = data else {
+                return completion(.failure(.badData))
+            }
+            
+            do {
+                let gig = try self.jsonDecoder.decode(Gig.self, from: data)
+                completion(.success(gig))
+                self.gigs.append(gig)
+            } catch {
+                print("Error decoding animal: \(error.localizedDescription)")
+                completion(.failure(.badURL))
+            }
+        }
+    .resume()
+    }
+    
+    
+    
     private func postRequest(for url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethod.post.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        return request
+    }
+    
+    private func getRequest(for url: URL, bearer: Bearer) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.addValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
         return request
     }
 }
