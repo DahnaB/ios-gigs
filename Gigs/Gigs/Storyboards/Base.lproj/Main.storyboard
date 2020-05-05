@@ -68,9 +68,9 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="INu-mi-ZO7" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1099" y="-572"/>
+            <point key="canvasLocation" x="1919" y="-270"/>
         </scene>
-        <!--Gigs Table View Controller-->
+        <!--Gigs-->
         <scene sceneID="7FC-F0-o1r">
             <objects>
                 <tableViewController id="U8h-12-5oN" customClass="GigsTableViewController" customModule="Gigs" customModuleProvider="target" sceneMemberID="viewController">
@@ -109,7 +109,7 @@
                             <outlet property="delegate" destination="U8h-12-5oN" id="b9y-gw-zmJ"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="sb8-Dn-rls"/>
+                    <navigationItem key="navigationItem" title="Gigs" id="sb8-Dn-rls"/>
                     <connections>
                         <segue destination="rfR-pj-SsG" kind="presentation" modalPresentationStyle="fullScreen" id="ROo-c9-XdA"/>
                     </connections>
@@ -131,15 +131,15 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3Nw-ID-8At" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1886" y="139"/>
+            <point key="canvasLocation" x="1919" y="420"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="GnY-a4-aqe">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="aq4-WF-WZJ" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="FII-RA-g3N">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="FII-RA-g3N">
+                        <rect key="frame" x="0.0" y="44" width="414" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
