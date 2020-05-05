@@ -62,4 +62,8 @@ class GigController {
             completion(.failure(.failedSignUp))
         }
     }
+    
+    func signIn(with user: User, completion: @escaping CompletionHandler) {
+        var request = URLRequest(url: signInURL)
+    }
 }
