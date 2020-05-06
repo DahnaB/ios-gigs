@@ -8,14 +8,15 @@
 
 import UIKit
 
-class LoginViewController: UIViewController {
+enum LoginType {
+    case signUp
+    case logIn
+}
+
+class LoginViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: Properties
     
-    enum LoginType {
-        case signUp
-        case logIn
-    }
     
     var gigController: GigController?
     var loginType = LoginType.signUp
@@ -41,7 +42,7 @@ class LoginViewController: UIViewController {
         }
     }
     
-    @IBAction func loginButtonTapped(_ sender: Any) {
+    @IBAction func loginButtonTapped(_ sender: UIButton) {
         if let username = usernameTextField.text,
             !username.isEmpty,
             let password = passwordTextField.text,
@@ -80,7 +81,7 @@ class LoginViewController: UIViewController {
                     } catch {
                         if let error = error as? GigController.NetworkError {
                             switch error{
-                                case .failedSignIn:
+                            case .failedSignIn:
                                 print("Sign in failed")
                             case .noData, .noToken:
                                 print("No data received")
@@ -99,18 +100,9 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        loginButton.layer.cornerRadius = 8.0
     }
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

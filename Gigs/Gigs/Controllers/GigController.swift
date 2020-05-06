@@ -21,11 +21,13 @@ class GigController {
     
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
     
+    var gigs: [Gig] = []
     var bearer: Bearer?
     
     let baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
     private lazy var signUpURL = baseURL.appendingPathComponent("/users/signup")
     private lazy var signInURL = baseURL.appendingPathComponent("/users/login")
+    private lazy var allGigsURL = baseURL.appendingPathComponent("/gigs/")
     
     private lazy var jsonEncoder = JSONEncoder()
     private lazy var jsonDecoder = JSONDecoder()
@@ -108,6 +110,46 @@ class GigController {
             print("Error encoding user: \(error)")
             completion(.failure(.failedSignIn))
         }
+    }
+    
+    func fetchAllGigs(completion: @escaping (Result<[Gig], NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            completion(.failure(.noToken))
+            return
+        }
+        var request = URLRequest(url: allGigsURL)
+        request.httpMethod = HTTPMethod.get.rawValue
+        request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error receiving gig data: \(error)")
+                completion(.failure(.tryAgain))
+                return
+            }
+            
+            if let response = response as? HTTPURLResponse,
+                response.statusCode == 401 {
+                completion(.failure(.noToken))
+                return
+            }
+            guard let data = data else {
+                print("No data received from fetchAllGigs")
+                completion(.failure(.noData))
+                return
+            }
+            
+            do {
+                let allGigs = try self.jsonDecoder.decode([Gig].self, from: data)
+                completion(.success(allGigs))
+                self.gigs = allGigs
+            } catch {
+                print("Error decoding animal name data: \(error)")
+                completion(.failure(.tryAgain))
+            }
+        }
+        
+        task.resume()
     }
     
 }
