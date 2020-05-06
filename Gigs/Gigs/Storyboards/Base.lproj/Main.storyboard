@@ -111,7 +111,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Gigs" id="sb8-Dn-rls"/>
                     <connections>
-                        <segue destination="rfR-pj-SsG" kind="presentation" modalPresentationStyle="fullScreen" id="ROo-c9-XdA"/>
+                        <segue destination="rfR-pj-SsG" kind="presentation" identifier="ShowLoginVC" modalPresentationStyle="fullScreen" id="ROo-c9-XdA"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hyi-aI-iXs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

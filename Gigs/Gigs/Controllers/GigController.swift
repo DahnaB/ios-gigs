@@ -16,7 +16,7 @@ class GigController {
     }
     
     enum NetworkError: Error {
-        case noData, failedSignUp, failedSignIn, noToken
+        case noData, failedSignUp, failedSignIn, noToken, tryAgain
     }
     
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void

@@ -26,6 +26,9 @@ class GigsTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        if gigController.bearer == nil {
+            performSegue(withIdentifier: "ShowLoginVC", sender: self)
+        }
     }
 
     // MARK: - Table view data source
@@ -40,15 +43,13 @@ class GigsTableViewController: UITableViewController {
         return 0
     }
 
-    /*
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
 
-        // Configure the cell...
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "", for: indexPath)
 
         return cell
     }
-    */
+
 
     /*
     // Override to support conditional editing of the table view.
