@@ -16,7 +16,7 @@ class GigController {
     }
     
     enum NetworkError: Error {
-        case noData, failedSignUp, failedSignIn
+        case noData, failedSignUp, failedSignIn, noToken
     }
     
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
@@ -28,6 +28,7 @@ class GigController {
     private lazy var signInURL = baseURL.appendingPathComponent("/users/login")
     
     private lazy var jsonEncoder = JSONEncoder()
+    private lazy var jsonDecoder = JSONDecoder()
     
     //Sign Up Function
     func signUp(with user: User, completion: @escaping CompletionHandler) {
@@ -64,6 +65,49 @@ class GigController {
     }
     
     func signIn(with user: User, completion: @escaping CompletionHandler) {
+        print("signInURL = \(signInURL.absoluteString)")
+        
         var request = URLRequest(url: signInURL)
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try jsonEncoder.encode(user)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print ("Sign up failed with error: \(error)")
+                    completion(.failure(.failedSignUp))
+                    return
+                }
+                
+                guard let response = response as? HTTPURLResponse,
+                    response.statusCode == 200 else {
+                        print("Sign up was unsuccessful")
+                        completion(.failure(.failedSignUp))
+                        return
+                }
+                
+                guard let data = data else {
+                    print("No data received during sign in")
+                    completion(.failure(.noData))
+                    return
+                }
+                
+                do {
+                    self.bearer = try self.jsonDecoder.decode(Bearer.self, from: data)
+                } catch {
+                    print("Error decoding bearer object: \(error)")
+                    completion(.failure(.noToken))
+                }
+                completion(.success(true))
+            }
+            task.resume()
+        } catch {
+            print("Error encoding user: \(error)")
+            completion(.failure(.failedSignIn))
+        }
     }
+    
 }
