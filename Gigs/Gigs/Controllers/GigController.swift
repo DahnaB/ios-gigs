@@ -16,7 +16,7 @@ class GigController {
     }
     
     enum NetworkError: Error {
-        case noData, failedSignUp, failedSignIn, noToken, tryAgain
+        case noData, failedSignUp, failedSignIn, noToken, tryAgain, badEncode
     }
     
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
@@ -148,8 +148,42 @@ class GigController {
                 completion(.failure(.tryAgain))
             }
         }
-        
         task.resume()
+    }
+    
+    func postGig(with gig: Gig, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            completion(.failure(.noToken))
+            return
+        }
+        
+        var request = URLRequest(url: allGigsURL)
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            let jsonData = try jsonEncoder.encode(gig)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { _, response, error in
+                if let error = error {
+                    print("Error encoding new gig: \(error)")
+                    completion(.failure(.tryAgain))
+                }
+                if let response = response as? HTTPURLResponse,
+                    response.statusCode != 200 {
+                        print("Post was unsuccessful, server status code = \(response.statusCode)")
+                    completion(.failure(.failedSignIn))
+                    return
+                }
+                completion(.success(true))
+                self.gigs.append(gig)
+            }
+            task.resume()
+        } catch {
+            print("Error encoding gig: \(error)")
+            completion(.failure(.badEncode))
+        }
     }
     
 }
