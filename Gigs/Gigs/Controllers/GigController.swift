@@ -104,6 +104,7 @@ class GigController {
                     completion(.failure(.noToken))
                 }
                 completion(.success(true))
+                print("\(self.bearer)")
             }
             task.resume()
         } catch {
@@ -114,10 +115,12 @@ class GigController {
     
     func fetchAllGigs(completion: @escaping (Result<[Gig], NetworkError>) -> Void) {
         guard let bearer = bearer else {
+            print("No bearer")
             completion(.failure(.noToken))
             return
         }
         var request = URLRequest(url: allGigsURL)
+        print("allGigsURL = \(request)")
         request.httpMethod = HTTPMethod.get.rawValue
         request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
         
@@ -129,8 +132,9 @@ class GigController {
             }
             
             if let response = response as? HTTPURLResponse,
-                response.statusCode == 401 {
-                completion(.failure(.noToken))
+                response.statusCode != 200 {
+                completion(.failure(.tryAgain))
+                print("bad status code")
                 return
             }
             guard let data = data else {
@@ -140,15 +144,18 @@ class GigController {
             }
             
             do {
+                self.jsonDecoder.dateDecodingStrategy = .secondsSince1970
                 let allGigs = try self.jsonDecoder.decode([Gig].self, from: data)
                 completion(.success(allGigs))
                 self.gigs = allGigs
+                print("fetched: \(allGigs)")
             } catch {
-                print("Error decoding animal name data: \(error)")
+                print("Error decoding gig data: \(error)")
                 completion(.failure(.tryAgain))
             }
         }
         task.resume()
+        print("task has been resumed")
     }
     
     func postGig(with gig: Gig, completion: @escaping (Result<Bool, NetworkError>) -> Void) {

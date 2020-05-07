@@ -10,6 +10,10 @@ import UIKit
 
 class GigDetailViewController: UIViewController {
     
+    // MARK: Properties
+    var gigController: GigController!
+    var gig: Gig?
+    
     // MARK: Outlets
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -18,25 +22,34 @@ class GigDetailViewController: UIViewController {
     
     // MARK:  Action
     @IBAction func saveButtonTapped(_ sender: UIBarButtonItem) {
+         
+            let date = datePicker.date
+            guard let title = titleTextField.text,
+                let description = descriptionTextView.text else { return }
+        
+        let newGig = Gig(title: title, dueDate: date, description: description)
+        
+        
+            
     }
-    
+        
+
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        updateViews()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func updateViews() {
+        if gig == nil {
+            self.title = "New Gig"
+        } else {
+            titleTextField?.text = gig?.title
+            datePicker.date = gig?.dueDate ?? Date()
+            descriptionTextView.text = gig?.description
+        }
     }
-    */
 
 }
