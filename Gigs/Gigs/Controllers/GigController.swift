@@ -123,6 +123,7 @@ class GigController {
         print("allGigsURL = \(request)")
         request.httpMethod = HTTPMethod.get.rawValue
         request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        self.jsonDecoder.dateDecodingStrategy = .iso8601
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -144,11 +145,10 @@ class GigController {
             }
             
             do {
-                self.jsonDecoder.dateDecodingStrategy = .secondsSince1970
                 let allGigs = try self.jsonDecoder.decode([Gig].self, from: data)
                 completion(.success(allGigs))
-                self.gigs = allGigs
                 print("fetched: \(allGigs)")
+                self.gigs = allGigs
             } catch {
                 print("Error decoding gig data: \(error)")
                 completion(.failure(.tryAgain))
@@ -166,8 +166,10 @@ class GigController {
         
         var request = URLRequest(url: allGigsURL)
         request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
         
+        jsonEncoder.dateEncodingStrategy = .iso8601
         do {
             let jsonData = try jsonEncoder.encode(gig)
             request.httpBody = jsonData
@@ -183,8 +185,8 @@ class GigController {
                     completion(.failure(.failedSignIn))
                     return
                 }
-                completion(.success(true))
                 self.gigs.append(gig)
+                completion(.success(true))
             }
             task.resume()
         } catch {
