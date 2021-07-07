@@ -2,88 +2,107 @@
 //  LoginViewController.swift
 //  Gigs
 //
-//  Created by Dahna on 4/7/20.
+//  Created by Dahna on 5/5/20.
 //  Copyright © 2020 Dahna Buenrostro. All rights reserved.
 //
 
 import UIKit
 
-enum LoginType: String {
-    case signUp = "Sign Up"
-    case signIn = "Sign In"
+enum LoginType {
+    case signUp
+    case logIn
 }
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
     
-    @IBOutlet weak var signUpLogInSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var usernameTextField: UITextField!
-    @IBOutlet weak var passwordTextField: UITextField!
-    @IBOutlet weak var submitButton: UIButton!
+    // MARK: Properties
     
     
     var gigController: GigController?
     var loginType = LoginType.signUp
-    private lazy var viewModel = LoginViewModel()
-    static let identifier: String = String(describing: LoginViewController.self)
     
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    // MARK: Outlets
+    
+    @IBOutlet weak var loginSegmentedController: UISegmentedControl!
+    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var loginButton: UIButton!
+    
+    // MARK: Actions
+    
+    @IBAction func segmentedController(_ sender: UISegmentedControl) {
         
-        // Do any additional setup after loading the view.
-    }
-    
-    @IBAction func loginTypeChanged(_ sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 1:
-            loginType = .signIn
-            passwordTextField.textContentType = .password
-        default:
+        if sender.selectedSegmentIndex == 0 {
             loginType = .signUp
-            passwordTextField.textContentType = .newPassword
+            loginButton.setTitle("Sign Up", for: .normal)
+        } else {
+            loginType = .logIn
+            loginButton.setTitle("Log In", for: .normal)
         }
-        
-        submitButton.setTitle(loginType.rawValue, for: .normal)
     }
     
-    
-    @IBAction func submitButtonTapped(_ sender: UIButton) {
-        guard let username = usernameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-            username.isEmpty == false,
-            let password = passwordTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-            password.isEmpty == false
-            else { return }
-        
-        let user = User(username: username, password: password)
-        
-        viewModel.submit(with: user, forLoginType: loginType) { loginResult in
-            DispatchQueue.main.async {
-                let alert: UIAlertController
-                let action: () -> Void
-                
-                switch loginResult {
-                case .signUpSucess:
-                    alert = self.alert(title: "Success", message: loginResult.rawValue)
-                    action = {
-                        self.present(alert, animated: true)
-                        self.signUpLogInSegmentedControl.selectedSegmentIndex = 1
-                        self.signUpLogInSegmentedControl.sendActions(for: .valueChanged)
+    @IBAction func loginButtonTapped(_ sender: UIButton) {
+        if let username = usernameTextField.text,
+            !username.isEmpty,
+            let password = passwordTextField.text,
+            !password.isEmpty {
+            let user = User(username: username, password: password)
+            
+            if loginType == .signUp {
+                gigController?.signUp(with: user, completion: { result in
+                    do {
+                        let success = try result.get()
+                        if success {
+                            DispatchQueue.main.async {
+                                let alertController = UIAlertController(title: "Sign Up Successful", message: "Please Log In", preferredStyle: .alert)
+                                let alertAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                                alertController.addAction(alertAction)
+                                self.present(alertController, animated: true) {
+                                    self.loginType = .logIn
+                                    self.loginSegmentedController.selectedSegmentIndex = 1
+                                    self.loginButton.setTitle("Sign In", for: .normal)
+                                }
+                            }
+                        }
+                    } catch {
+                        print("Error signing up: \(error)")
                     }
-                case .signInSuccess:
-                    action = { self.dismiss(animated: true) }
-                case .signUpError, .signInError:
-                    alert = self.alert(title: "Error", message: loginResult.rawValue)
-                    action = { self.present(alert, animated: true) }
-                }
-                action()
+                })
+            } else {
+                gigController?.signIn(with: user, completion: { result in
+                    do {
+                        let success = try result.get()
+                        if success {
+                            DispatchQueue.main.async {
+                                self.dismiss(animated: true, completion: nil)
+                            }
+                        }
+                    } catch {
+                        if let error = error as? GigController.NetworkError {
+                            switch error{
+                            case .failedSignIn:
+                                print("Sign in failed")
+                            case .noData, .noToken:
+                                print("No data received")
+                            default:
+                                print("Other Error occurred")
+                            }
+                        }
+                    }
+                })
             }
         }
+        
     }
     
-    private func alert(title: String, message: String) -> UIAlertController {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        return alert
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        loginButton.layer.cornerRadius = 8.0
     }
     
+
+
 }

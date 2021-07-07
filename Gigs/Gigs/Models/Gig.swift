@@ -2,14 +2,14 @@
 //  Gig.swift
 //  Gigs
 //
-//  Created by Dahna on 4/8/20.
+//  Created by Dahna on 5/6/20.
 //  Copyright © 2020 Dahna Buenrostro. All rights reserved.
 //
 
 import Foundation
 
-struct Gig: Decodable, Hashable {
+struct Gig: Codable {
     let title: String
-    let description: String
     let dueDate: Date
+    let description: String
 }

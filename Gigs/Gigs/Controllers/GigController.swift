@@ -2,173 +2,197 @@
 //  GigController.swift
 //  Gigs
 //
-//  Created by Dahna on 4/7/20.
+//  Created by Dahna on 5/5/20.
 //  Copyright © 2020 Dahna Buenrostro. All rights reserved.
 //
 
 import Foundation
 
-final class GigController {
+class GigController {
+    
     enum HTTPMethod: String {
         case get = "GET"
         case post = "POST"
     }
     
     enum NetworkError: Error {
-        case failedSignUp, failedSignIn, noData, badData
-        case notSignedIn, failedFetch, badURL
+        case noData, failedSignUp, failedSignIn, noToken, tryAgain, badEncode
     }
     
-    private enum LoginStatus {
-        case notLoggedIn
-        case loggedIn(Bearer)
-        
-        static var isLoggedIn: Self {
-            if let bearer = GigController.bearer {
-                return loggedIn(bearer)
-            } else {
-                return notLoggedIn
-            }
-        }
-    }
+    typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
     
-    static var bearer: Bearer?
     var gigs: [Gig] = []
+    var bearer: Bearer?
     
-    private let baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
+    let baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
     private lazy var signUpURL = baseURL.appendingPathComponent("/users/signup")
-    private lazy var logInURL = baseURL.appendingPathComponent("/users/login")
-    private lazy var gigsURL = baseURL.appendingPathComponent("/gigs/")
+    private lazy var signInURL = baseURL.appendingPathComponent("/users/login")
+    private lazy var allGigsURL = baseURL.appendingPathComponent("/gigs/")
     
-    private lazy var jsonEncoder: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        return encoder
-    }()
-    
+    private lazy var jsonEncoder = JSONEncoder()
     private lazy var jsonDecoder = JSONDecoder()
     
-    func signUp(with user: User, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        var request = postRequest(for: signUpURL)
+    //Sign Up Function
+    func signUp(with user: User, completion: @escaping CompletionHandler) {
+        print("signUpURL = \(signUpURL.absoluteString)")
+        
+        var request = URLRequest(url: signUpURL)
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
             let jsonData = try jsonEncoder.encode(user)
-            print(String(data: jsonData, encoding: .utf8)!)
             request.httpBody = jsonData
             
-            URLSession.shared.dataTask(with: request) {_, response, error in
+            let task = URLSession.shared.dataTask(with: request) { _, response, error in
                 if let error = error {
-                    print("Sign up failed with error: \(error.localizedDescription)")
+                    print ("Sign up failed with error: \(error)")
                     completion(.failure(.failedSignUp))
                     return
                 }
                 
                 guard let response = response as? HTTPURLResponse,
-                    response.statusCode == 200
-                    else {
+                    response.statusCode == 200 else {
                         print("Sign up was unsuccessful")
-                        return completion(.failure(.failedSignUp))
+                        completion(.failure(.failedSignUp))
+                        return
                 }
                 completion(.success(true))
             }
-            .resume()
+            task.resume()
         } catch {
-            print("Error encoding user: \(error.localizedDescription)")
+            print("Error encoding user: \(error)")
             completion(.failure(.failedSignUp))
         }
     }
     
-    func logIn(with user: User, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
-        var request = postRequest(for: logInURL)
+    func signIn(with user: User, completion: @escaping CompletionHandler) {
+        print("signInURL = \(signInURL.absoluteString)")
+        
+        var request = URLRequest(url: signInURL)
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
             let jsonData = try jsonEncoder.encode(user)
             request.httpBody = jsonData
             
-            URLSession.shared.dataTask(with: request) { data, response, error in
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    print("Sign in failed with error: \(error.localizedDescription)")
-                    completion(.failure(.failedSignIn))
+                    print ("Sign up failed with error: \(error)")
+                    completion(.failure(.failedSignUp))
                     return
                 }
                 
                 guard let response = response as? HTTPURLResponse,
-                    response.statusCode == 200
-                    else {
-                        print("Sign in was unsuccessful")
-                        return completion(.failure(.failedSignIn))
+                    response.statusCode == 200 else {
+                        print("Sign up was unsuccessful")
+                        completion(.failure(.failedSignUp))
+                        return
                 }
                 
                 guard let data = data else {
-                    print("Data was no received")
+                    print("No data received during sign in")
                     completion(.failure(.noData))
                     return
                 }
                 
                 do {
-                    Self.bearer = try self.jsonDecoder.decode(Bearer.self, from: data)
-                    completion(.success(true))
+                    self.bearer = try self.jsonDecoder.decode(Bearer.self, from: data)
                 } catch {
-                    print("Error decoding bearer: \(error.localizedDescription)")
-                    completion(.failure(.failedSignIn))
+                    print("Error decoding bearer object: \(error)")
+                    completion(.failure(.noToken))
                 }
+                completion(.success(true))
+                print("\(self.bearer)")
             }
-            .resume()
+            task.resume()
         } catch {
-            print("Error encoding user: \(error.localizedDescription)")
+            print("Error encoding user: \(error)")
             completion(.failure(.failedSignIn))
         }
     }
     
-    func getGigs(completion: @escaping (Result<Gig, NetworkError>) -> Void) {
-        guard case let .loggedIn(bearer) = LoginStatus.isLoggedIn else {
-            return completion(.failure(.notSignedIn))
+    func fetchAllGigs(completion: @escaping (Result<[Gig], NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            print("No bearer")
+            completion(.failure(.noToken))
+            return
         }
+        var request = URLRequest(url: allGigsURL)
+        print("allGigsURL = \(request)")
+        request.httpMethod = HTTPMethod.get.rawValue
+        request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        self.jsonDecoder.dateDecodingStrategy = .iso8601
         
-        let request = getRequest(for: gigsURL, bearer: bearer)
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Failed to fetch gig with error \(error.localizedDescription)")
-                completion(.failure(.failedFetch))
+                print("Error receiving gig data: \(error)")
+                completion(.failure(.tryAgain))
                 return
             }
             
-            guard let response = response as? HTTPURLResponse,
-            response.statusCode == 200
-                else {
-                    print(#file, #function, #line, "Fetch gig received bad response")
-                    completion(.failure(.failedFetch))
-                    return
+            if let response = response as? HTTPURLResponse,
+                response.statusCode != 200 {
+                completion(.failure(.tryAgain))
+                print("bad status code")
+                return
             }
             guard let data = data else {
-                return completion(.failure(.badData))
+                print("No data received from fetchAllGigs")
+                completion(.failure(.noData))
+                return
             }
             
             do {
-                let gig = try self.jsonDecoder.decode(Gig.self, from: data)
-                completion(.success(gig))
-                self.gigs.append(gig)
+                let allGigs = try self.jsonDecoder.decode([Gig].self, from: data)
+                completion(.success(allGigs))
+                print("fetched: \(allGigs)")
+                self.gigs = allGigs
             } catch {
-                print("Error decoding animal: \(error.localizedDescription)")
-                completion(.failure(.badURL))
+                print("Error decoding gig data: \(error)")
+                completion(.failure(.tryAgain))
             }
         }
-    .resume()
+        task.resume()
+        print("task has been resumed")
     }
     
-    
-    
-    private func postRequest(for url: URL) -> URLRequest {
-        var request = URLRequest(url: url)
+    func postGig(with gig: Gig, completion: @escaping (Result<Bool, NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            completion(.failure(.noToken))
+            return
+        }
+        
+        var request = URLRequest(url: allGigsURL)
         request.httpMethod = HTTPMethod.post.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        return request
+        request.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        
+        jsonEncoder.dateEncodingStrategy = .iso8601
+        do {
+            let jsonData = try jsonEncoder.encode(gig)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { _, response, error in
+                if let error = error {
+                    print("Error encoding new gig: \(error)")
+                    completion(.failure(.tryAgain))
+                }
+                if let response = response as? HTTPURLResponse,
+                    response.statusCode != 200 {
+                        print("Post was unsuccessful, server status code = \(response.statusCode)")
+                    completion(.failure(.failedSignIn))
+                    return
+                }
+                self.gigs.append(gig)
+                completion(.success(true))
+            }
+            task.resume()
+        } catch {
+            print("Error encoding gig: \(error)")
+            completion(.failure(.badEncode))
+        }
     }
     
-    private func getRequest(for url: URL, bearer: Bearer) -> URLRequest {
-        var request = URLRequest(url: url)
-        request.addValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
-        return request
-    }
 }
